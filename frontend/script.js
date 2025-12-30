@@ -147,28 +147,55 @@ document.getElementById('sendBtn').addEventListener('click', async () => {
 });
 
 // --- 3. Helper: Map Rendering ---
+/**
+ * Advanced Helper: Handles Map visibility and initialization
+ * Optimized for mobile touch interactions and dynamic sizing
+ */
 function renderMap(lat, lng) {
     const mapDiv = document.getElementById('map');
     const infoPreview = document.getElementById('infoPreview');
 
     if (mapDiv) {
+        // Ensure display is block before initializing Leaflet
         mapDiv.style.display = 'block';
         if (infoPreview) infoPreview.style.display = 'none';
 
         if (!map) {
             // zoomControl: false for a cleaner mobile UI
-            map = L.map('map', { zoomControl: false }).setView([lat, lng], 13);
+            map = L.map('map', {
+                zoomControl: false,
+                tap: true, // Specifically enables touch support for mobile Leaflet
+                dragging: true
+            }).setView([lat, lng], 13);
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap'
+                attribution: '&copy; OpenStreetMap',
+                // Prevents tiles from looking blurry on high-res mobile screens
+                detectRetina: true
             }).addTo(map);
         } else {
             map.setView([lat, lng], 13);
         }
 
-        L.marker([lat, lng]).addTo(map).bindPopup('System Located').openPopup();
+        // Add marker
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup('System Located').openPopup();
 
-        // Fix for tile rendering issues in hidden containers
-        setTimeout(() => map.invalidateSize(), 300);
+        /** * MOBILE FIX: map.invalidateSize()
+         * Leaflet often fails to render tiles on mobile because the div height 
+         * isn't calculated immediately. We call it twice to be safe.
+         */
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        setTimeout(() => {
+            map.invalidateSize();
+            // Force tiles to reload if they appear grey
+            map.eachLayer(function (layer) {
+                if (layer.redraw) layer.redraw();
+            });
+        }, 400);
     }
 }
 

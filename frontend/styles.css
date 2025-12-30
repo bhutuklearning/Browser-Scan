@@ -487,3 +487,36 @@ body {
         font-size: 1.1rem;
     }
 }
+
+/* Add this at the end of your styles.css */
+
+/* Fix for Leaflet Map on Mobile */
+#map {
+    height: 250px;
+    /* Increased height for better mobile visibility */
+    width: 100%;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    display: none;
+    /* Controlled by JS */
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    position: relative;
+    /* Crucial: Ensures Leaflet tiles stay above the card background */
+    z-index: 5;
+    /* Prevents the container from collapsing on mobile browsers */
+    min-height: 200px;
+}
+
+/* Ensure the Leaflet pane itself is visible */
+.leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+}
+
+@media (max-width: 600px) {
+    #map {
+        height: 220px;
+        /* Slightly shorter for smaller screens */
+        margin-top: 10px;
+    }
+}
