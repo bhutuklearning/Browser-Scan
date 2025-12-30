@@ -37,7 +37,7 @@ app.use(limiter);
 // CORS Configuration Fix
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://browser-scan.vercel.app' // Removed trailing slash to fix CORS error
+        ? 'https://scan-browser.vercel.app' // Removed trailing slash to fix CORS error
         : '*',
     methods: ['POST', 'GET'],
     allowedHeaders: ['Content-Type']
