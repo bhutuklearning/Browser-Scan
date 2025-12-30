@@ -171,6 +171,11 @@ app.get('/api/admin/logs', async (req, res) => {
     }
 });
 
+// Health Check Route
+app.get('/health', (req, res) => {
+    res.status(200).send("Server is healthy");
+});
+
 app.listen(PORT, () => {
     console.log(`Secure Server Active on Port: ${PORT}`);
 });
