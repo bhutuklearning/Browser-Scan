@@ -36,7 +36,7 @@ app.use(limiter);
 // Replace 'https://your-vercel-project.vercel.app' with your actual Vercel URL
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://your-vercel-project.vercel.app'
+        ? 'https://browser-scan.vercel.app/'
         : '*',
     methods: ['POST', 'GET'],
     allowedHeaders: ['Content-Type']
