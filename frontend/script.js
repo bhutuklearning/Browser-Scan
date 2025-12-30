@@ -1,7 +1,7 @@
 let map; // Global map variable to persist the map instance
 
 // CONFIGURATION: Update this to your production URL when deploying
-const BACKEND_URL = 'http://localhost:8000/receive';
+const BACKEND_URL = 'https://browser-scan.onrender.com/receive';
 
 // --- 0. Persistence: Auto-Load & Stats Initialization ---
 window.addEventListener('DOMContentLoaded', () => {
