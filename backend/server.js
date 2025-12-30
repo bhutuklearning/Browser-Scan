@@ -34,9 +34,10 @@ app.use(limiter);
 
 // CORS Configuration
 // Replace 'https://your-vercel-project.vercel.app' with your actual Vercel URL
+// CORS Configuration Fix
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://browser-scan.vercel.app/'
+        ? 'https://browser-scan.vercel.app' // Removed trailing slash to fix CORS error
         : '*',
     methods: ['POST', 'GET'],
     allowedHeaders: ['Content-Type']
