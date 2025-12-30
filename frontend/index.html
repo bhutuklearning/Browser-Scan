@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/jpg+xml" href="./assets/image.png" />
+    <link rel="apple-touch-icon" href="./assets/image.png">
+    <title>Scan Browser</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="icon-pulse"></div>
+                <img src="./assets/image.png" alt="Scan Browser Logo" class="logo-img">
+                <!-- <span>Scan Browser</span> -->
+            </div>
+            <div class="nav-right">
+                <!-- <div class="nav-links">
+                    <a href="#" class="active">Home</a>
+                    <a href="admin.html">Admin</a>
+                </div> -->
+                <a href="https://www.instagram.com/amrit.anshu_/" target="_blank" class="msg-float"
+                   title="Message me on Instagram">
+                    <i class="fa-regular fa-comment-dots"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                <div class="header">
+                    <div class="icon-pulse"></div>
+                    <h1>Scan Browser</h1>
+                    <p>Cross-Browser Hardware & Geo Analysis</p>
+                </div>
+                <div class="content">
+                    <div id="status" class="status-box">Ready for system scan...</div>
+                    <div id="map"></div>
+                    <div id="results" class="results-grid" style="display: none;"></div>
+                    <div class="info-preview" id="infoPreview">
+                        <ul>
+                            <li>Identify Browser Engine (Brave/Firefox/Chrome/Safari)</li>
+                            <li>Fetch GPS Coordinates (Requires Permission)</li>
+                            <li>Verify Hardware Latency & Battery Health (On Desktop)</li>
+                        </ul>
+                    </div>
+                    <button id="sendBtn" class="primary-btn">
+                        <span>Start Deep Scan</span>
+                    </button>
+                </div>
+                <div id="adminStats" class="status-box"
+                     style="display:none; border-color: var(--accent); margin-top: 20px; background: rgba(56, 189, 248, 0.05);">
+                    <p style="margin-bottom: 10px; font-weight: 600; color: var(--accent);">System Wide Statistics:</p>
+                    <div id="totalCount" style="font-size: 1.2rem; color: var(--text-main); font-weight: bold;"></div>
+                    <div id="browserNiche"
+                         style="font-size: 0.8rem; margin-top: 10px; text-align: left; line-height: 1.4;"></div>
+                </div>
+                <div class="card-footer-info">
+                    <small>Secure Data Transmission • v1.0.0</small>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="glass-footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <span>Scan Browser© 2026</span>
+            </div>
+            <div class="footer-right">
+                <span class="creator-text">Say Hi to the creator:</span>
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/amritanshu-goutam/"><i class="fab fa-linkedin"></i></a>
+                    <a href="https://x.com/Amritanshutwt" aria-label="X (Twitter)"><i
+                           class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
