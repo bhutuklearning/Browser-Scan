@@ -15,10 +15,6 @@ import adminRoutes from './routes/admin.routes.js';
 dotenv.config();
 const app = express();
 
-// Trust the first proxy (required on Render / any reverse-proxy host)
-// so express-rate-limit can read X-Forwarded-For without throwing
-// ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
-app.set('trust proxy', 1);
 
 // MongoDB Connection Intialization
 connectDB();
@@ -29,14 +25,14 @@ const LOG_FILE = 'logs.json';
 // Helpers for compression/decompression
 const gzip = promisify(zlib.gzip);
 
-// Rate Limiting 
+// Rate Limiting
 const limiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    windowMs: 10 * 60 * 1000,
+    max: 100,
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false }, // suppress Render proxy header error
 });
-
 app.use(limiter);
 
 // CORS Configuration
