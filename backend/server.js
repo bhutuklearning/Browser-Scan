@@ -15,6 +15,11 @@ import adminRoutes from './routes/admin.routes.js';
 dotenv.config();
 const app = express();
 
+// Trust the first proxy (required on Render / any reverse-proxy host)
+// so express-rate-limit can read X-Forwarded-For without throwing
+// ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+app.set('trust proxy', 1);
+
 // MongoDB Connection Intialization
 connectDB();
 
