@@ -142,8 +142,8 @@ function pingServer() {
         .catch(err => console.error('Error pinging server:', err.message));
 }
 
-// Ping every 4 minutes (240000 milliseconds)
-setInterval(pingServer, 240000);
+// Ping every 10 minutes (600000 milliseconds)
+setInterval(pingServer, 600000);
 
 app.listen(PORT, () => {
     console.log(`Secure Server Active on Port: ${PORT}`);
