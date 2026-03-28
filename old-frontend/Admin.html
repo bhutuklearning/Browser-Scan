@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Scan Browser</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            background: var(--card-bg);
+        }
+
+        .log-table th,
+        .log-table td {
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-wrapper" style="align-items: flex-start; padding-top: 50px;">
+        <div class="container" style="max-width: 900px;">
+            <div class="card" style="text-align: left;">
+                <h2>Intelligence Dashboard</h2>
+                <div class="admin-grid">
+                    <div class="status-box">
+                        <p style="color:var(--accent)">Top Geographical Hotspots</p>
+                        <ul id="geoList"></ul>
+                    </div>
+                    <div class="status-box">
+                        <p style="color:var(--accent)">Active IP Regions</p>
+                        <ul id="ipList"></ul>
+                    </div>
+                </div>
+                <h3>Recent Scan Logs</h3>
+                <div style="overflow-x: auto;">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Browser</th>
+                                <th>Location</th>
+                                <th>Battery</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_BASE = 'http://localhost:8000/api/admin';
+
+        async function initAdmin() {
+            // Fetch Analytics
+            const statsRes = await fetch(`${API_BASE}/analytics`);
+            const stats = await statsRes.json();
+
+            document.getElementById('geoList').innerHTML = stats.geoHotspots.map(g =>
+                `<li>Area: ${g._id.lat}, ${g._id.lng} (${g.count} hits)</li>`).join('');
+
+            document.getElementById('ipList').innerHTML = stats.ipDistribution.map(i =>
+                `<li>IP: ${i._id} (${i.count} scans)</li>`).join('');
+
+            // Fetch Raw Logs
+            const logsRes = await fetch(`${API_BASE}/logs`);
+            const logs = await logsRes.json();
+
+            document.getElementById('logBody').innerHTML = logs.map(l => `
+                <tr>
+                    <td>${l.ip}</td>
+                    <td>${l.browser}</td>
+                    <td>${l.latitude}, ${l.longitude}</td>
+                    <td>${l.battery}</td>
+                </tr>
+            `).join('');
+        }
+        initAdmin();
+    </script>
+</body>
+</html>

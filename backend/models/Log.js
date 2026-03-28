@@ -19,7 +19,7 @@ const logSchema = new mongoose.Schema({
     },
     receivedAt: {
         type: Date,
-        default: Date.now()
+        default: Date.now
     }
 }, { timestamps: true });
 

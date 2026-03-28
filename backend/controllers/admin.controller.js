@@ -4,45 +4,69 @@ import { promisify } from 'util';
 
 const gunzip = promisify(zlib.gunzip);
 
-export const getAdminAnalytics = async (req, res) => {
+// GET /api/admin/stats — Total audit count + browser distribution
+// Used by the main frontend to show system-wide stats on load
+export const getStats = async (req, res) => {
     try {
-        // 1. Geographical Hotspots: Grouping by rounded Lat/Long to find common areas
-        const geoHotspots = await Log.aggregate([
-            {
-                $group: {
-                    _id: {
-                        lat: { $substr: ["$latitude", 0, 5] },
-                        lng: { $substr: ["$longitude", 0, 5] }
-                    },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { count: -1 } },
-            { $limit: 5 }
+        const totalRequests = await Log.countDocuments();
+
+        const browserStats = await Log.aggregate([
+            { $group: { _id: '$browser', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
         ]);
 
-        // 2. IP Region Analysis: Grouping by IP (or subnet)
+        res.json({ totalRequests, browsers: browserStats });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+};
+
+// GET /api/admin/analytics — Geo hotspots & IP distribution
+// NOTE: lat/lng are stored in the compressed payload, so we aggregate
+// on the uncompressed top-level fields (ip, browser) only.
+export const getAdminAnalytics = async (req, res) => {
+    try {
+        // Top IPs by scan count
         const ipDistribution = await Log.aggregate([
-            { $group: { _id: "$ip", count: { $sum: 1 } } },
+            { $group: { _id: '$ip', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 }
         ]);
 
-        res.json({ geoHotspots, ipDistribution });
+        // Browser distribution
+        const browserDistribution = await Log.aggregate([
+            { $group: { _id: '$browser', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.json({ ipDistribution, browserDistribution });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
+// GET /api/admin/logs — Fetch and decompress all raw logs
 export const getAllRawLogs = async (req, res) => {
     try {
         const logs = await Log.find().sort({ receivedAt: -1 }).lean();
-        const decrypted = await Promise.all(logs.map(async (log) => {
-            const buffer = await gunzip(log.payload);
-            return { ...JSON.parse(buffer.toString()), id: log._id, ip: log.ip };
-        }));
+        const decrypted = await Promise.all(
+            logs.map(async (log) => {
+                try {
+                    const buffer = await gunzip(log.payload);
+                    return {
+                        id: log._id,
+                        ip: log.ip,
+                        browser: log.browser,
+                        receivedAt: log.receivedAt,
+                        ...JSON.parse(buffer.toString())
+                    };
+                } catch (e) {
+                    return { id: log._id, ip: log.ip, error: 'Decompression failed' };
+                }
+            })
+        );
         res.json(decrypted);
     } catch (err) {
-        res.status(500).json({ error: "Decompression failed" });
+        res.status(500).json({ error: 'Failed to fetch logs' });
     }
 };

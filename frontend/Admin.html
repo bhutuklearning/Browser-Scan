@@ -4,32 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Scan Browser</title>
+    <meta name="description" content="Scan Browser admin intelligence dashboard — audit logs and analytics">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="icon" type="image/svg+xml"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='8' fill='%2338bdf8'/%3E%3Ccircle cx='16' cy='16' r='6' stroke='%230f172a' stroke-width='2' fill='none'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%230f172a'/%3E%3C/svg%3E" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        .admin-container {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
         .admin-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-panel {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+        }
+
+        .admin-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .admin-panel ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .admin-panel li {
+            font-size: 0.82rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            border-left: 2px solid var(--accent-indigo);
+        }
+
+        .log-section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .log-section-title i {
+            color: var(--accent-cyan);
+        }
+
+        .log-table-wrap {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
         }
 
         .log-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 0.8rem;
-            background: var(--card-bg);
+            font-size: 0.78rem;
         }
 
-        .log-table th,
-        .log-table td {
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .log-table th {
+            background: rgba(56, 189, 248, 0.06);
+            color: var(--accent-cyan);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.75rem 1rem;
             text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
         }
 
-        @media (max-width: 768px) {
+        .log-table td {
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .log-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .log-table tr:hover td {
+            background: rgba(56, 189, 248, 0.04);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .empty-state i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
             .admin-grid {
                 grid-template-columns: 1fr;
             }
@@ -37,64 +145,206 @@
     </style>
 </head>
 <body>
-    <div class="mobile-wrapper" style="align-items: flex-start; padding-top: 50px;">
-        <div class="container" style="max-width: 900px;">
-            <div class="card" style="text-align: left;">
-                <h2>Intelligence Dashboard</h2>
-                <div class="admin-grid">
-                    <div class="status-box">
-                        <p style="color:var(--accent)">Top Geographical Hotspots</p>
-                        <ul id="geoList"></ul>
-                    </div>
-                    <div class="status-box">
-                        <p style="color:var(--accent)">Active IP Regions</p>
-                        <ul id="ipList"></ul>
+    <!-- Animated Background -->
+    <div class="bg-effects">
+        <div class="gradient-orb gradient-orb-1"></div>
+        <div class="gradient-orb gradient-orb-2"></div>
+        <div class="gradient-orb gradient-orb-3"></div>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <div class="logo-pulse"></div>
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#logoGrad)" />
+                        <circle cx="16" cy="16" r="6" stroke="#0f172a" stroke-width="2" fill="none" />
+                        <circle cx="16" cy="16" r="2" fill="#0f172a" />
+                        <path d="M16 6V10M16 22V26M6 16H10M22 16H26" stroke="#0f172a" stroke-width="2"
+                              stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#38bdf8" />
+                                <stop offset="100%" stop-color="#818cf8" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">Scan Browser</span>
+            </a>
+            <div class="nav-right">
+                <a href="index.html" class="social-btn" title="Back to Scanner">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="main-content" style="align-items: flex-start; padding-top: 100px;">
+        <div class="admin-container">
+            <div class="hero-card">
+                <div class="card-glow"></div>
+                <div class="card-border"></div>
+                <!-- Header -->
+                <div class="card-header" style="text-align: left; margin-bottom: 1.5rem;">
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="
+                            width:40px; height:40px;
+                            background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(129,140,248,0.15));
+                            border-radius: var(--radius-sm);
+                            display:flex; align-items:center; justify-content:center;
+                            color: var(--accent-cyan); font-size:1.1rem;
+                        "><i class="fas fa-chart-line"></i></div>
+                        <div>
+                            <h1 class="title" style="font-size:1.5rem; margin:0;">Intelligence Dashboard</h1>
+                            <p class="subtitle" style="margin:0; font-size:0.85rem;">System-wide audit analytics</p>
+                        </div>
                     </div>
                 </div>
-                <h3>Recent Scan Logs</h3>
-                <div style="overflow-x: auto;">
-                    <table class="log-table">
-                        <thead>
-                            <tr>
-                                <th>IP</th>
-                                <th>Browser</th>
-                                <th>Location</th>
-                                <th>Battery</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logBody"></tbody>
-                    </table>
+                <div class="card-content">
+                    <!-- Stats Row -->
+                    <div id="statsRow" class="status-box" style="margin-bottom:1.5rem;">
+                        <div class="status-icon"><i class="fas fa-spinner fa-spin"></i></div>
+                        <span>Loading analytics...</span>
+                    </div>
+                    <!-- Analytics Grid -->
+                    <div class="admin-grid">
+                        <div class="admin-panel">
+                            <div class="admin-panel-title">
+                                <i class="fas fa-globe"></i> Top IP Regions
+                            </div>
+                            <ul id="ipList">
+                                <li class="loading-state">Loading...</li>
+                            </ul>
+                        </div>
+                        <div class="admin-panel">
+                            <div class="admin-panel-title">
+                                <i class="fas fa-browser"></i> Browser Split
+                            </div>
+                            <ul id="browserList">
+                                <li class="loading-state">Loading...</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Log Table -->
+                    <div class="log-section-title">
+                        <i class="fas fa-database"></i> Recent Scan Logs
+                    </div>
+                    <div class="log-table-wrap">
+                        <table class="log-table">
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Browser</th>
+                                    <th>Location</th>
+                                    <th>Battery</th>
+                                    <th>Received</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logBody">
+                                <tr>
+                                    <td colspan="5" class="loading-state">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading logs...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="footer-left">
+                        <span class="version-badge">Admin v2.0</span>
+                        <span class="secure-badge"><i class="fas fa-lock"></i> API Key Protected</span>
+                    </div>
+                    <div class="footer-right">
+                        <span class="copyright">Scan Browser © 2026</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
     <script>
-        const API_BASE = 'http://localhost:8000/api/admin';
+        const API_BASE = 'https://browser-scan.onrender.com/api/admin';
+        // const API_BASE = 'http://localhost:8000/api/admin'; // ← local dev
+        const ADMIN_KEY = 'scanbrowser-admin-2026';
+        const AUTH_HEADERS = { 'x-admin-key': ADMIN_KEY };
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = String(text || '—');
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            return new Date(dateStr).toLocaleString();
+        }
 
         async function initAdmin() {
-            // Fetch Analytics
-            const statsRes = await fetch(`${API_BASE}/analytics`);
-            const stats = await statsRes.json();
+            const statsRow = document.getElementById('statsRow');
 
-            document.getElementById('geoList').innerHTML = stats.geoHotspots.map(g =>
-                `<li>Area: ${g._id.lat}, ${g._id.lng} (${g.count} hits)</li>`).join('');
+            try {
+                // ── Stats ──────────────────────────────────────────────
+                const statsRes = await fetch(`${API_BASE}/stats`, { headers: AUTH_HEADERS });
+                if (!statsRes.ok) throw new Error('Unauthorized or server offline');
+                const stats = await statsRes.json();
 
-            document.getElementById('ipList').innerHTML = stats.ipDistribution.map(i =>
-                `<li>IP: ${i._id} (${i.count} scans)</li>`).join('');
+                statsRow.className = 'status-box success';
+                statsRow.innerHTML = `
+                    <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                    <span>Total Audits: <strong>${stats.totalRequests.toLocaleString()}</strong></span>
+                `;
 
-            // Fetch Raw Logs
-            const logsRes = await fetch(`${API_BASE}/logs`);
-            const logs = await logsRes.json();
+                // ── Analytics ──────────────────────────────────────────
+                const analyticsRes = await fetch(`${API_BASE}/analytics`, { headers: AUTH_HEADERS });
+                const analytics = await analyticsRes.json();
 
-            document.getElementById('logBody').innerHTML = logs.map(l => `
-                <tr>
-                    <td>${l.ip}</td>
-                    <td>${l.browser}</td>
-                    <td>${l.latitude}, ${l.longitude}</td>
-                    <td>${l.battery}</td>
-                </tr>
-            `).join('');
+                document.getElementById('ipList').innerHTML = analytics.ipDistribution.length
+                    ? analytics.ipDistribution.map(i =>
+                        `<li>${escapeHtml(i._id)} — ${i.count} scan${i.count > 1 ? 's' : ''}</li>`
+                    ).join('')
+                    : '<li>No data yet</li>';
+
+                document.getElementById('browserList').innerHTML = analytics.browserDistribution.length
+                    ? analytics.browserDistribution.map(b =>
+                        `<li>${escapeHtml(b._id || 'Unknown')} — ${b.count}</li>`
+                    ).join('')
+                    : '<li>No data yet</li>';
+
+                // ── Raw Logs ───────────────────────────────────────────
+                const logsRes = await fetch(`${API_BASE}/logs`, { headers: AUTH_HEADERS });
+                const logs = await logsRes.json();
+
+                if (!logs.length) {
+                    document.getElementById('logBody').innerHTML =
+                        '<tr><td colspan="5" class="empty-state"><i class="fas fa-inbox"></i>No logs yet</td></tr>';
+                    return;
+                }
+
+                document.getElementById('logBody').innerHTML = logs.map(l => `
+                    <tr>
+                        <td>${escapeHtml(l.ip)}</td>
+                        <td>${escapeHtml(l.browser)}</td>
+                        <td>${escapeHtml(l.latitude && l.longitude ? `${l.latitude}, ${l.longitude}` : 'N/A')}</td>
+                        <td>${escapeHtml(l.battery || 'N/A')}</td>
+                        <td>${escapeHtml(formatDate(l.receivedAt))}</td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                statsRow.className = 'status-box error';
+                statsRow.innerHTML = `
+                    <div class="status-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <span>Failed to load data — ${escapeHtml(err.message)}</span>
+                `;
+                document.getElementById('ipList').innerHTML = '<li>Unavailable</li>';
+                document.getElementById('browserList').innerHTML = '<li>Unavailable</li>';
+                document.getElementById('logBody').innerHTML =
+                    '<tr><td colspan="5" class="empty-state">Server offline or invalid API key</td></tr>';
+            }
         }
+
         initAdmin();
     </script>
 </body>

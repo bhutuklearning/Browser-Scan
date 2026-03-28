@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import zlib from 'zlib';
 import { promisify } from 'util';
 
+const gunzip = promisify(zlib.gunzip);
+
 import connectDB from './config/db.js';
 import Log from './models/Log.js';
 import adminRoutes from './routes/admin.routes.js';
@@ -19,7 +21,7 @@ connectDB();
 const PORT = process.env.PORT || 4000;
 const LOG_FILE = 'logs.json';
 
-// Helper for compression
+// Helpers for compression/decompression
 const gzip = promisify(zlib.gzip);
 
 // Rate Limiting 
@@ -37,10 +39,10 @@ app.use(limiter);
 // CORS Configuration Fix
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
-        ? 'https://scan-browser.vercel.app' // Removed trailing slash to fix CORS error
+        ? 'https://scan-browser.vercel.app'
         : '*',
-    methods: ['POST', 'GET'],
-    allowedHeaders: ['Content-Type']
+    methods: ['POST', 'GET', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'x-admin-key']
 }));
 app.use(express.json());
 
@@ -124,52 +126,8 @@ app.post('/receive', async (req, res) => {
     }
 });
 
-// --- ADMIN API: Get Niche Stats (Total Requests & Browser Distribution) ---
-app.get('/api/admin/stats', async (req, res) => {
-    try {
-        // 1. Count total documents in collection
-        const totalRequests = await Log.countDocuments();
-
-        // 2. Aggregate uncompressed 'browser' field to find niche reach
-        const browserStats = await Log.aggregate([
-            { $group: { _id: "$browser", count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
-
-        res.json({
-            totalRequests,
-            browsers: browserStats
-        });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch stats" });
-    }
-});
-
-// --- ADMIN API: Fetch & Decompress Raw Logs ---
-app.get('/api/admin/logs', async (req, res) => {
-    try {
-        const encryptedLogs = await Log.find().sort({ receivedAt: -1 }).lean();
-
-        const decryptedLogs = await Promise.all(encryptedLogs.map(async (log) => {
-            try {
-                const decompressedBuffer = await gunzip(log.payload);
-                const originalData = JSON.parse(decompressedBuffer.toString());
-                return {
-                    id: log._id,
-                    ip: log.ip,
-                    receivedAt: log.receivedAt,
-                    ...originalData
-                };
-            } catch (e) {
-                return { id: log._id, error: "Decompression failed", raw: log.ip };
-            }
-        }));
-
-        res.json(decryptedLogs);
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch logs" });
-    }
-});
+// Note: /api/admin/stats, /api/admin/logs, /api/admin/analytics
+// are all handled by adminRoutes (see routes/admin.routes.js)
 
 // Health Check Route
 app.get('/health', (req, res) => {
