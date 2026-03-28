@@ -8,7 +8,7 @@ const router = express.Router();
 const requireApiKey = (req, res, next) => {
     const key = req.headers['x-admin-key'];
     // Fallback to a default key if the environment variable is not set (e.g., in production on Render)
-    const validKey = process.env.ADMIN_API_KEY || 'scanbrowser-admin-2026';
+    const validKey = process.env.ADMIN_API_KEY;
 
     if (key !== validKey) {
         return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });

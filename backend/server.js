@@ -134,6 +134,17 @@ app.get('/health', (req, res) => {
     res.status(200).send("Server is healthy");
 });
 
+// Function to ping the server every 5 minutes
+function pingServer() {
+    const url = `${process.env.BACKEND_URL}/ping` || `http://localhost:${process.env.PORT}/ping`;
+    axios.get(url)
+        .then(() => console.log('Pinged server at', new Date().toLocaleString()))
+        .catch(err => console.error('Error pinging server:', err.message));
+}
+
+// Ping every 4 minutes (240000 milliseconds)
+setInterval(pingServer, 240000);
+
 app.listen(PORT, () => {
     console.log(`Secure Server Active on Port: ${PORT}`);
 });
