@@ -7,7 +7,10 @@ const router = express.Router();
 // All /api/admin/* routes require the X-Admin-Key header to match ADMIN_API_KEY in .env
 const requireApiKey = (req, res, next) => {
     const key = req.headers['x-admin-key'];
-    if (!process.env.ADMIN_API_KEY || key !== process.env.ADMIN_API_KEY) {
+    // Fallback to a default key if the environment variable is not set (e.g., in production on Render)
+    const validKey = process.env.ADMIN_API_KEY || 'scanbrowser-admin-2026';
+
+    if (key !== validKey) {
         return res.status(401).json({ error: 'Unauthorized: Invalid or missing API key' });
     }
     next();
