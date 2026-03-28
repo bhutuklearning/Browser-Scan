@@ -31,7 +31,7 @@ const limiter = rateLimit({
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-    validate: { xForwardedForHeader: false }, // suppress Render proxy header error
+    validate: false, // disable all validation checks (fixes Render proxy error)
 });
 app.use(limiter);
 
@@ -56,37 +56,6 @@ app.get('/', (req, res) => {
     res.status(200).send("System Diagnostic Logging Server is Active");
 });
 
-// app.post('/receive', async (req, res) => {
-//     try {
-//         const logEntry = {
-//             id: Date.now(),
-//             // Better IP detection for proxy-heavy environments like Render/Vercel
-//             ip: req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress,
-//             receivedAt: new Date().toISOString(),
-//             ...req.body
-//         };
-
-//         let logs = [];
-//         try {
-//             const fileData = await fs.readFile(LOG_FILE, 'utf8');
-//             logs = JSON.parse(fileData);
-//         } catch (e) {
-//             // Create empty array if file is missing or corrupted
-//             logs = [];
-//         }
-
-//         logs.push(logEntry);
-
-//         // Use 'null, 2' for readable formatting in logs.json
-//         await fs.writeFile(LOG_FILE, JSON.stringify(logs, null, 2));
-
-//         console.log(`[AUDIT] Data received from IP: ${logEntry.ip}`);
-//         res.status(200).json({ status: "captured", message: "System analysis logged." });
-//     } catch (err) {
-//         console.error("Write Error:", err);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
 
 app.post('/receive', async (req, res) => {
     try {
@@ -135,16 +104,15 @@ app.get('/health', (req, res) => {
     res.status(200).send("Server is healthy");
 });
 
-// Function to ping the server every 5 minutes
-function pingServer() {
-    const url = `${process.env.BACKEND_URL}/ping` || `http://localhost:${process.env.PORT}/ping`;
-    axios.get(url)
+// Ping server to keep Render instance alive (every 10 minutes)
+setInterval(() => {
+    const url = process.env.BACKEND_URL
+        ? `${process.env.BACKEND_URL}/health`
+        : `http://localhost:${PORT}/health`;
+    fetch(url)
         .then(() => console.log('Pinged server at', new Date().toLocaleString()))
         .catch(err => console.error('Error pinging server:', err.message));
-}
-
-// Ping every 10 minutes (600000 milliseconds)
-setInterval(pingServer, 600000);
+}, 600000);
 
 app.listen(PORT, () => {
     console.log(`Secure Server Active on Port: ${PORT}`);
