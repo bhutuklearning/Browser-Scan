@@ -65,8 +65,13 @@
         <div class="container">
             <!-- Hero Card -->
             <div class="hero-card">
-                <div class="card-glow"></div>
-                <div class="card-border"></div>
+                <!-- .card-bg-clip: overflow:hidden wrapper that contains the
+                     200%-wide card-glow without touching the hero-card itself
+                     (overflow:hidden on hero-card would break Leaflet tiles) -->
+                <div class="card-bg-clip">
+                    <div class="card-glow"></div>
+                    <div class="card-border"></div>
+                </div>
                 <!-- Header Section -->
                 <div class="card-header">
                     <div class="scan-animation">

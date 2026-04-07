@@ -244,8 +244,8 @@
             // Initialize the Leaflet map
             map = L.map('map', {
                 zoomControl: false,
-                tap: true,         // Mobile touch support
-                dragging: true,    // Allow panning
+                tap: false,        // Deprecated in Leaflet 1.9 — caused duplicate touch events
+                dragging: true,    // Allow panning on desktop
                 scrollWheelZoom: false
             }).setView([lat, lng], 13);
 
@@ -302,6 +302,12 @@
             map.invalidateSize();
             map.eachLayer((layer) => { if (layer.redraw) layer.redraw(); });
         }, 500);
+
+        // On touch devices, disable map dragging so a finger on the map
+        // scrolls the page normally instead of panning the map and getting "stuck".
+        if (L.Browser.touch) {
+            map.dragging.disable();
+        }
     }
 
     // ============================================

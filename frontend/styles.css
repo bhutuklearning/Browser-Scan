@@ -78,9 +78,9 @@
 }
 
 html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden; /* Prevent horizontal document overflow globally */
 }
 
 body {
@@ -89,6 +89,8 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
+    width: 100%;
+    position: relative;
     line-height: 1.6;
 }
 
@@ -292,11 +294,22 @@ body {
     border-radius: var(--radius-xl);
     padding: var(--space-xl);
     box-shadow: var(--shadow-lg), var(--shadow-glow);
-    /* overflow: hidden removed — it collapsed Leaflet map tiles to 2px height */
-    clip-path: inset(0 round var(--radius-xl));
+    /* overflow:hidden intentionally omitted — it collapses Leaflet map tiles.
+       The .card-bg-clip wrapper below contains the glow overflow instead. */
     animation: cardEntry 0.8s var(--transition-bounce) forwards;
     opacity: 0;
     transform: translateY(30px);
+}
+
+/* Clips the decorative card-glow / card-border without touching the
+   hero-card itself, so Leaflet tile layout keeps working. */
+.card-bg-clip {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
 }
 
 @keyframes cardEntry {
@@ -541,6 +554,8 @@ body {
     box-shadow: 0 4px 20px rgba(56, 189, 248, 0.1);
     position: relative;
     z-index: 5;
+    /* Map should not hijack browser touch scrolling */
+    touch-action: auto !important;
 }
 
 /* Let Leaflet manage its own internal layout.
