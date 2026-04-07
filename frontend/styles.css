@@ -883,6 +883,61 @@ body {
     color: var(--text-muted);
 }
 
+/* --- Author Note --- */
+.author-note {
+    margin-top: var(--space-2xl);
+    background: var(--gradient-card);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    color: var(--text-primary);
+    font-family: 'Caveat', cursive;
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    position: relative;
+    animation: resultsFadeIn 0.8s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
+}
+
+.note-header {
+    margin-bottom: var(--space-md);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.note-header h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-indigo) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+.note-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.note-content p {
+    font-size: 1.5rem;
+    line-height: 1.5;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-indigo) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.02em;
+}
+
 /* --- Responsive Design --- */
 @media (max-width: 600px) {
     .main-content {
@@ -945,6 +1000,19 @@ body {
 
     .logo-text {
         font-size: 1rem;
+    }
+
+    .author-note {
+        padding: var(--space-lg);
+        margin-top: var(--space-xl);
+    }
+
+    .note-header h2 {
+        font-size: 1.8rem;
+    }
+
+    .note-content p {
+        font-size: 1.25rem;
     }
 }
 
